@@ -6,7 +6,7 @@
   "homepage": "https://github.com/contensu/directus-extension-safe-rename",
   "repository": {
     "type": "git",
-    "url": "https://github.com/contensu/directus-extension-safe-rename"
+    "url": "git+https://github.com/contensu/directus-extension-safe-rename.git"
   },
   "bugs": {
     "url": "https://github.com/contensu/directus-extension-safe-rename/issues"
