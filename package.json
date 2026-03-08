@@ -1,0 +1,65 @@
+{
+  "name": "directus-extension-safe-rename",
+  "description": "Safely rename Directus collections and fields with impact analysis",
+  "author": "contensu-dev",
+  "license": "MIT",
+  "homepage": "https://github.com/contensu/directus-extension-safe-rename",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/contensu/directus-extension-safe-rename"
+  },
+  "bugs": {
+    "url": "https://github.com/contensu/directus-extension-safe-rename/issues"
+  },
+  "icon": "drive_file_rename_outline",
+  "version": "0.1.0",
+  "keywords": [
+    "directus",
+    "directus-extension",
+    "directus-extension-bundle",
+    "schema",
+    "rename",
+    "migration"
+  ],
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "directus:extension": {
+    "type": "bundle",
+    "path": {
+      "app": "dist/app.js",
+      "api": "dist/api.js"
+    },
+    "entries": [
+      {
+        "type": "module",
+        "name": "safe-rename-module",
+        "source": "src/safe-rename-module/index.ts"
+      },
+      {
+        "type": "endpoint",
+        "name": "safe-rename-endpoint",
+        "source": "src/safe-rename-endpoint/index.ts"
+      }
+    ],
+    "host": "^10.10.0"
+  },
+  "scripts": {
+    "build": "directus-extension build",
+    "dev": "directus-extension build -w --no-minify",
+    "link": "directus-extension link",
+    "validate": "directus-extension validate",
+    "add": "directus-extension add"
+  },
+  "devDependencies": {
+    "@directus/extensions-sdk": "17.0.5",
+    "@directus/types": "14.3.0",
+    "@types/express": "5.0.6",
+    "knex": "3.1.0",
+    "sass": "1.97.3",
+    "typescript": "5.9.3",
+    "vue": "3.5.27"
+  },
+  "dependencies": {}
+}
