@@ -68,14 +68,9 @@ This extension handles all of that automatically.
 ---
 
 ## Installation
-
-### Via Directus Marketplace
-Search for `directus-extension-safe-rename` in the Directus Marketplace.
-
-### Manual
+Search for `directus-extension-safe-rename` in the Directus Marketplace, or install via npm:
 ```bash
-# In your Directus project
-npm install directus-extension-safe-rename
+npm install @contensu/directus-extension-safe-rename
 ```
 
 Then restart your Directus instance.

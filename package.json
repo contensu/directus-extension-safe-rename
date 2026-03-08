@@ -1,6 +1,6 @@
 {
   "name": "@contensu/directus-extension-safe-rename",
-  "description": "Safely rename Directus collections and fields with impact analysis",
+  "description": "Rename collections and fields across all Directus metadata, relations, permissions, and flows.",
   "author": "contensu-dev",
   "license": "MIT",
   "homepage": "https://github.com/contensu/directus-extension-safe-rename",
