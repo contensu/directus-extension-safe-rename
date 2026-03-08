@@ -1,5 +1,5 @@
 {
-  "name": "directus-extension-safe-rename",
+  "name": "@contensu/directus-extension-safe-rename",
   "description": "Safely rename Directus collections and fields with impact analysis",
   "author": "contensu-dev",
   "license": "MIT",
