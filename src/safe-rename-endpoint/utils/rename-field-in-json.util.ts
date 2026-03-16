@@ -71,6 +71,11 @@ export function renameFieldInString(
     return newName;
   }
 
+  // 🔹 B2. Negated sort prefix: "-old_field" → "-new_field"
+  if (value.startsWith("-") && value.slice(1) === oldName) {
+    return `-${newName}`;
+  }
+
   // 🔹 C. Plain dotted paths (relation.field.field)
   if (value.includes(".")) {
     return value
