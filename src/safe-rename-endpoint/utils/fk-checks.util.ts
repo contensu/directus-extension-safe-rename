@@ -19,10 +19,10 @@ export function getFkCheckStatements(clientName: string): {
   }
 
   if (["sqlite3", "sqlite"].includes(clientName)) {
-    // PRAGMA foreign_keys cannot be changed inside a transaction in SQLite.
-    // It must be run on the raw database connection before the transaction starts.
-    // We return null here so the inside-transaction call is a no-op.
-    return { disable: null, enable: null };
+    return {
+      disable: `PRAGMA defer_foreign_keys = ON`,
+      enable: null, // auto-resets at end of transaction
+    };
   }
 
   // CockroachDB, Oracle, unknown — no-op

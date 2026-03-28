@@ -217,9 +217,9 @@ describe("getFkCheckStatements", () => {
     expect(enable).toBe(`SET FOREIGN_KEY_CHECKS = 1`);
   });
 
-  it("returns null for sqlite3 (PRAGMA handled outside transaction)", () => {
+  it("returns defer_foreign_keys for sqlite3", () => {
     const { disable, enable } = getFkCheckStatements("sqlite3");
-    expect(disable).toBeNull();
+    expect(disable).toBe("PRAGMA defer_foreign_keys = ON");
     expect(enable).toBeNull();
   });
 
