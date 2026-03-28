@@ -1,0 +1,37 @@
+services:
+  database:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: directus
+      POSTGRES_PASSWORD: directus
+      POSTGRES_DB: directus
+    healthcheck:
+      test: ["CMD", "pg_isready", "--host=localhost", "--username=directus"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  directus:
+    image: directus/directus:${DIRECTUS_VERSION:-11.5.1}
+    ports:
+      - 8055:8055
+    volumes:
+      - ./uploads:/directus/uploads
+      - ./dist:/directus/extensions/directus-extension-safe-rename/dist
+      - ./package.json:/directus/extensions/directus-extension-safe-rename/package.json
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      SECRET: ci-secret
+      DB_CLIENT: pg
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_DATABASE: directus
+      DB_USER: directus
+      DB_PASSWORD: directus
+      ADMIN_EMAIL: admin@example.com
+      ADMIN_PASSWORD: d1r3ctu5
+      EXTENSIONS_AUTO_RELOAD: "false"
+      CACHE_ENABLED: "false"

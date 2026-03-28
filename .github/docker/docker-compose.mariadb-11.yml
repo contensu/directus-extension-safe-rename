@@ -1,0 +1,38 @@
+services:
+  database:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: directus
+      MARIADB_DATABASE: directus
+      MARIADB_USER: directus
+      MARIADB_PASSWORD: directus
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  directus:
+    image: directus/directus:${DIRECTUS_VERSION:-11.5.1}
+    ports:
+      - 8055:8055
+    volumes:
+      - ./uploads:/directus/uploads
+      - ./dist:/directus/extensions/directus-extension-safe-rename/dist
+      - ./package.json:/directus/extensions/directus-extension-safe-rename/package.json
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      SECRET: ci-secret
+      DB_CLIENT: mysql
+      DB_HOST: database
+      DB_PORT: 3306
+      DB_DATABASE: directus
+      DB_USER: directus
+      DB_PASSWORD: directus
+      ADMIN_EMAIL: admin@example.com
+      ADMIN_PASSWORD: d1r3ctu5
+      EXTENSIONS_AUTO_RELOAD: "false"
+      CACHE_ENABLED: "false"

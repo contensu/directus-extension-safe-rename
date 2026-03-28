@@ -119,17 +119,70 @@ export async function renameCollection(
           .update({ options: JSON.stringify(options) });
       }
 
+      // directus_panels - update options.collection
+      const panels = await trx("directus_panels")
+        .whereNotNull("options")
+        .select("id", "options");
+
+      for (const panel of panels) {
+        const options =
+          typeof panel.options === "string"
+            ? JSON.parse(panel.options)
+            : panel.options;
+
+        if (options?.collection !== sourceCollection) continue;
+
+        options.collection = targetCollection;
+
+        await trx("directus_panels")
+          .where({ id: panel.id })
+          .update({ options: JSON.stringify(options) });
+      }
+
+      // directus_relations - update one_allowed_collections (M2A)
+      const m2aRelations = await trx("directus_relations")
+        .whereNotNull("one_allowed_collections")
+        .select("id", "one_allowed_collections");
+
+      for (const rel of m2aRelations) {
+        let allowed = rel.one_allowed_collections;
+
+        // Directus stores one_allowed_collections as a comma-separated string
+        if (typeof allowed === "string") {
+          allowed = allowed
+            .split(",")
+            .map((s: string) => s.trim())
+            .filter(Boolean);
+        }
+
+        if (!Array.isArray(allowed) || !allowed.includes(sourceCollection))
+          continue;
+
+        const updated = allowed.map((c: string) =>
+          c === sourceCollection ? targetCollection : c,
+        );
+
+        await trx("directus_relations")
+          .where({ id: rel.id })
+          .update({ one_allowed_collections: updated.join(",") });
+      }
+
       /* -------------------------
          Rename actual table
+         (skip for folder collections — they have no physical table)
       --------------------------*/
 
-      await trx.schema.renameTable(sourceCollection, targetCollection);
+      const tableExists = await trx.schema.hasTable(sourceCollection);
 
-      /* -------------------------
-         Fix sequence
-      --------------------------*/
+      if (tableExists) {
+        await trx.schema.renameTable(sourceCollection, targetCollection);
 
-      await fixSequence(trx, sourceCollection, targetCollection);
+        /* -------------------------
+           Fix sequence
+        --------------------------*/
+
+        await fixSequence(trx, sourceCollection, targetCollection);
+      }
 
       // Re-enable FK checks
       await enableFkChecks(trx);

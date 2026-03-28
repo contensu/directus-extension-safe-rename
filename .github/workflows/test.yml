@@ -1,0 +1,106 @@
+name: Test
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install
+      - run: pnpm vitest run tests/unit
+
+  integration:
+    name: "${{ matrix.directus }} / ${{ matrix.db }}"
+    runs-on: ubuntu-latest
+    needs: unit
+
+    strategy:
+      fail-fast: false
+      matrix:
+        directus: ["11.3.0", "11.4.0", "11.5.1", "11.16.1", "11.17.0"]
+        db:
+          - postgres-13
+          - postgres-16
+          - mysql-8
+          - mariadb-11
+          - sqlite
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build extension
+        run: pnpm build
+
+      - name: Create uploads folder
+        run: mkdir -p uploads && chmod 777 uploads
+
+      - name: Start Directus (${{ matrix.db }})
+        run: |
+          docker compose \
+            -f .github/docker/docker-compose.${{ matrix.db }}.yml \
+            up -d
+        env:
+          DIRECTUS_VERSION: ${{ matrix.directus }}
+
+      - name: Wait for Directus to be ready
+        run: |
+          echo "Waiting for Directus..."
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8055/server/health > /dev/null 2>&1; then
+              echo "✅ Directus ready after ${i}s"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "❌ Directus did not become ready"
+          docker compose -f .github/docker/docker-compose.${{ matrix.db }}.yml logs
+          exit 1
+
+      - name: Run integration tests
+        env:
+          DIRECTUS_URL: http://localhost:8055
+          DIRECTUS_EMAIL: admin@example.com
+          DIRECTUS_PASSWORD: d1r3ctu5
+        run: pnpm vitest run --no-file-parallelism tests/integration
+
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          docker compose \
+            -f .github/docker/docker-compose.${{ matrix.db }}.yml \
+            logs --tail=100
+
+      - name: Tear down
+        if: always()
+        run: |
+          docker compose \
+            -f .github/docker/docker-compose.${{ matrix.db }}.yml \
+            down -v --remove-orphans

@@ -1,0 +1,17 @@
+services:
+  directus:
+    image: directus/directus:${DIRECTUS_VERSION:-11.5.1}
+    ports:
+      - 8055:8055
+    volumes:
+      - ./uploads:/directus/uploads
+      - ./dist:/directus/extensions/directus-extension-safe-rename/dist
+      - ./package.json:/directus/extensions/directus-extension-safe-rename/package.json
+    environment:
+      SECRET: ci-secret
+      DB_CLIENT: sqlite3
+      DB_FILENAME: /tmp/directus.db
+      ADMIN_EMAIL: admin@example.com
+      ADMIN_PASSWORD: d1r3ctu5
+      EXTENSIONS_AUTO_RELOAD: "false"
+      CACHE_ENABLED: "false"

@@ -50,16 +50,21 @@
     "dev": "directus-extension build -w --no-minify",
     "link": "directus-extension link",
     "validate": "directus-extension validate",
-    "add": "directus-extension add"
+    "add": "directus-extension add",
+    "test": "vitest run --no-file-parallelism",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration --no-file-parallelism"
   },
   "devDependencies": {
     "@directus/extensions-sdk": "17.0.5",
     "@directus/types": "14.3.0",
     "@types/express": "5.0.6",
+    "@types/node": "25.5.0",
     "knex": "3.1.0",
     "sass": "1.97.3",
+    "tsx": "4.21.0",
     "typescript": "5.9.3",
+    "vitest": "4.1.0",
     "vue": "3.5.27"
-  },
-  "dependencies": {}
+  }
 }

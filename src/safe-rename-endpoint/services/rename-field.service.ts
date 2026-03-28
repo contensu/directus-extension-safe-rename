@@ -21,11 +21,19 @@ export async function renameField(
       for (const { sourceField, targetField } of fields) {
         /* -------------------------
            Rename actual column
+           (skip for alias fields — M2M, M2A, O2M virtual fields have no physical column)
         --------------------------*/
 
-        await trx.schema.table(collection, (table: any) => {
-          table.renameColumn(sourceField, targetField);
-        });
+        const columnExists = await trx.schema.hasColumn(
+          collection,
+          sourceField,
+        );
+
+        if (columnExists) {
+          await trx.schema.table(collection, (table: any) => {
+            table.renameColumn(sourceField, targetField);
+          });
+        }
 
         /* -------------------------
            Update Directus metadata
