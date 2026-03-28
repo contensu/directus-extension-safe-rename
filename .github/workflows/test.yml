@@ -63,6 +63,7 @@ jobs:
         run: |
           docker compose \
             -f .github/docker/docker-compose.${{ matrix.db }}.yml \
+            --project-directory . \
             up -d
         env:
           DIRECTUS_VERSION: ${{ matrix.directus }}
@@ -78,7 +79,7 @@ jobs:
             sleep 3
           done
           echo "❌ Directus did not become ready"
-          docker compose -f .github/docker/docker-compose.${{ matrix.db }}.yml logs
+          docker compose -f .github/docker/docker-compose.${{ matrix.db }}.yml --project-directory . logs
           exit 1
 
       - name: Run integration tests
@@ -93,6 +94,7 @@ jobs:
         run: |
           docker compose \
             -f .github/docker/docker-compose.${{ matrix.db }}.yml \
+            --project-directory . \
             logs --tail=100
 
       - name: Tear down
@@ -100,4 +102,5 @@ jobs:
         run: |
           docker compose \
             -f .github/docker/docker-compose.${{ matrix.db }}.yml \
+            --project-directory . \
             down -v --remove-orphans
