@@ -17,7 +17,8 @@ services:
     ports:
       - 8055:8055
     volumes:
-      - ./uploads:/directus/uploads
+      - type: tmpfs
+        target: /directus/uploads
       - ./dist:/directus/extensions/directus-extension-safe-rename/dist
       - ./package.json:/directus/extensions/directus-extension-safe-rename/package.json
     depends_on:
