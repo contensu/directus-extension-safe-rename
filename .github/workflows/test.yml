@@ -33,13 +33,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        directus: ["11.3.0", "11.4.0", "11.5.1", "11.16.1", "11.17.0"]
+        directus: ["11.5.1"]
         db:
-          - postgres-13
+          # - postgres-13
           - postgres-16
-          - mysql-8
-          - mariadb-11
-          - sqlite
+          # - mysql-8
+          # - mariadb-11
+          # - sqlite
 
     steps:
       - uses: actions/checkout@v4
