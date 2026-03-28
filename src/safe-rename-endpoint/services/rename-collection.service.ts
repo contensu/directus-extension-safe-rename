@@ -15,7 +15,7 @@ export async function renameCollection(
   await database.transaction(async (trx) => {
     try {
       // Disable FK checks
-      await disableFkChecks(trx);
+      await disableFkChecks(trx, database);
 
       /* -------------------------
          Update Directus metadata
@@ -185,9 +185,9 @@ export async function renameCollection(
       }
 
       // Re-enable FK checks
-      await enableFkChecks(trx);
+      await enableFkChecks(trx, database);
     } catch (err) {
-      await enableFkChecks(trx);
+      await enableFkChecks(trx, database);
       logger.error({ err }, "Failed to rename collection");
       throw err;
     }

@@ -16,7 +16,7 @@ export async function renameField(
 
   await database.transaction(async (trx: any) => {
     try {
-      await disableFkChecks(trx);
+      await disableFkChecks(trx, database);
 
       for (const { sourceField, targetField } of fields) {
         /* -------------------------
@@ -457,9 +457,9 @@ export async function renameField(
         }
       }
 
-      await enableFkChecks(trx);
+      await enableFkChecks(trx, database);
     } catch (err) {
-      await enableFkChecks(trx);
+      await enableFkChecks(trx, database);
       logger.error({ err }, "Failed to rename fields(s)");
       throw err;
     }

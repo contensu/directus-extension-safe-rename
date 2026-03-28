@@ -217,10 +217,10 @@ describe("getFkCheckStatements", () => {
     expect(enable).toBe(`SET FOREIGN_KEY_CHECKS = 1`);
   });
 
-  it("returns correct SQL for sqlite3", () => {
+  it("returns null for sqlite3 (PRAGMA handled outside transaction)", () => {
     const { disable, enable } = getFkCheckStatements("sqlite3");
-    expect(disable).toBe(`PRAGMA foreign_keys = OFF`);
-    expect(enable).toBe(`PRAGMA foreign_keys = ON`);
+    expect(disable).toBeNull();
+    expect(enable).toBeNull();
   });
 
   it("returns null for unknown client (cockroachdb)", () => {
