@@ -25,48 +25,19 @@ export function getFkCheckStatements(clientName: string): {
     };
   }
 
-  // CockroachDB, Oracle, unknown — no-op
   return { disable: null, enable: null };
 }
 
-/**
- * Disables foreign key checks.
- * For SQLite, must be called with the raw database connection (before transaction).
- * For all other DBs, called inside the transaction via trx.
- */
 export async function disableFkChecks(
   trx: Knex.Transaction<any, any[]>,
-  database?: Knex,
 ): Promise<void> {
-  const clientName = trx.client.config.client;
-
-  // SQLite: PRAGMA must run outside the transaction on the raw connection
-  if (["sqlite3", "sqlite"].includes(clientName)) {
-    if (database) await database.raw("PRAGMA foreign_keys = OFF");
-    return;
-  }
-
-  const { disable } = getFkCheckStatements(clientName);
+  const { disable } = getFkCheckStatements(trx.client.config.client);
   if (disable) await trx.raw(disable);
 }
 
-/**
- * Re-enables foreign key checks.
- * For SQLite, must be called with the raw database connection (after transaction).
- * For all other DBs, called inside the transaction via trx.
- */
 export async function enableFkChecks(
   trx: Knex.Transaction<any, any[]>,
-  database?: Knex,
 ): Promise<void> {
-  const clientName = trx.client.config.client;
-
-  // SQLite: PRAGMA must run outside the transaction on the raw connection
-  if (["sqlite3", "sqlite"].includes(clientName)) {
-    if (database) await database.raw("PRAGMA foreign_keys = ON");
-    return;
-  }
-
-  const { enable } = getFkCheckStatements(clientName);
+  const { enable } = getFkCheckStatements(trx.client.config.client);
   if (enable) await trx.raw(enable);
 }
