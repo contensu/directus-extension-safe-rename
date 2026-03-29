@@ -1,8 +1,6 @@
 # directus-extension-safe-rename
 
-> ⚠️ **This extension is currently in beta. Always backup your database before using.**
-
-A [Directus](https://directus.io) extension that lets you safely rename collections and fields directly from the Directus UI — updating all metadata, relations, permissions, presets, flows, and more in a single atomic transaction.
+A [Directus](https://directus.io) extension that lets you safely rename collections and fields — updating all metadata, relations, permissions, presets, flows, and more in a single atomic transaction.
 
 Built by [Contensu](https://github.com/contensu) — a Directus agency.
 
@@ -30,33 +28,35 @@ This extension handles all of that automatically.
 ## What gets updated
 
 ### When renaming a collection
-| Table | Columns updated |
-|---|---|
-| `directus_collections` | `collection`, `group` |
-| `directus_fields` | `collection` |
-| `directus_relations` | `many_collection`, `one_collection` |
-| `directus_permissions` | `collection` |
-| `directus_presets` | `collection` |
-| `directus_shares` | `collection` |
-| `directus_versions` | `collection` |
-| `directus_revisions` | `collection`, `item` |
-| `directus_activity` | `collection` |
-| `directus_notifications` | `collection` |
-| `directus_comments` | `collection` |
-| `directus_flows` | `options.collections[]` |
-| `directus_operations` | `options.collection` |
+
+| Table                    | Columns updated                     |
+| ------------------------ | ----------------------------------- |
+| `directus_collections`   | `collection`, `group`               |
+| `directus_fields`        | `collection`                        |
+| `directus_relations`     | `many_collection`, `one_collection` |
+| `directus_permissions`   | `collection`                        |
+| `directus_presets`       | `collection`                        |
+| `directus_shares`        | `collection`                        |
+| `directus_versions`      | `collection`                        |
+| `directus_revisions`     | `collection`, `item`                |
+| `directus_activity`      | `collection`                        |
+| `directus_notifications` | `collection`                        |
+| `directus_comments`      | `collection`                        |
+| `directus_flows`         | `options.collections[]`             |
+| `directus_operations`    | `options.collection`                |
 
 ### When renaming a field
-| Table | Columns updated |
-|---|---|
-| `directus_fields` | `field`, `group`, `options`, `display_options`, `conditions`, `validation` |
-| `directus_relations` | `many_field`, `one_field`, `one_collection_field`, `junction_field`, `sort_field` |
-| `directus_collections` | `archive_field`, `sort_field`, `display_template`, `item_duplication_fields` |
-| `directus_permissions` | `fields` (CSV), `permissions`, `validation`, `presets` (JSON) |
-| `directus_presets` | `layout_query`, `layout_options`, `filter` |
-| `directus_flows` | `options` |
-| `directus_operations` | `options` |
-| `directus_panels` | `options` |
+
+| Table                  | Columns updated                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------- |
+| `directus_fields`      | `field`, `group`, `options`, `display_options`, `conditions`, `validation`        |
+| `directus_relations`   | `many_field`, `one_field`, `one_collection_field`, `junction_field`, `sort_field` |
+| `directus_collections` | `archive_field`, `sort_field`, `display_template`, `item_duplication_fields`      |
+| `directus_permissions` | `fields` (CSV), `permissions`, `validation`, `presets` (JSON)                     |
+| `directus_presets`     | `layout_query`, `layout_options`, `filter`                                        |
+| `directus_flows`       | `options`                                                                         |
+| `directus_operations`  | `options`                                                                         |
+| `directus_panels`      | `options`                                                                         |
 
 ---
 
@@ -68,48 +68,75 @@ This extension handles all of that automatically.
 ---
 
 ## Installation
-Search for `directus-extension-safe-rename` in the Directus Marketplace, or install via npm:
+
+### Via npm (recommended)
+
 ```bash
 npm install @contensu/directus-extension-safe-rename
 ```
 
 Then restart your Directus instance.
 
+### Via Directus Marketplace
+
+This extension requires direct database access and is classified as a **non-sandboxed** extension. It will **not appear in the Directus Marketplace** by default.
+
+To enable Marketplace installation, set the following environment variable in your Directus instance:
+
+```env
+MARKETPLACE_TRUST="all"
+```
+
+> ⚠️ This setting allows installation of all non-sandboxed extensions from the Marketplace. Only enable it if you trust the extensions you are installing.
+
+For more details, see the [Directus self-hosting extensions guide](https://directus.io/docs/self-hosting/including-extensions).
+
 ---
 
 ## Usage
 
-1. Go to the **Schema Rename** module in the left sidebar
-2. Select a collection from the list
-3. **To rename the collection** — edit the collection name field and click **Rename Collection**
-4. **To rename fields** — edit any field name in the list and click **Rename Fields**
+1. Go to **Settings → Project Settings** and enable the **Schema Rename** module under the Modules bar
+2. The **Schema Rename** module will now appear in the left sidebar — click it
+3. Select a collection from the list
+4. **To rename the collection** — edit the collection name field and click **Rename Collection**
+5. **To rename fields** — edit any field name in the list and click **Rename Fields**
+
+![Rename Collection](https://raw.githubusercontent.com/contensu/directus-extension-safe-rename/main/docs/images/rename-collection.png)
+
+![Rename Fields](https://raw.githubusercontent.com/contensu/directus-extension-safe-rename/main/docs/images/rename-fields.png)
 
 ---
 
 ## Database Support
 
-| Database | Status |
-|---|---|
-| PostgreSQL | ✅ Tested |
-| MySQL | ⚠️ Untested |
-| SQLite | ⚠️ Untested |
-| CockroachDB | ⚠️ Untested |
-| Oracle | ⚠️ Untested |
+| Database      | Status    |
+| ------------- | --------- |
+| PostgreSQL 13 | ✅ Tested |
+| PostgreSQL 16 | ✅ Tested |
+| MySQL 8       | ✅ Tested |
+| MariaDB 11    | ✅ Tested |
+| SQLite        | ✅ Tested |
+
+Tested against Directus `11.14.1`, `11.16.1`, and `11.17.0`.
+
+---
+
+## CI & Releases
+
+Every pull request runs a full integration test suite across **15 jobs** (3 Directus versions × 5 databases) via GitHub Actions. Releases are published to npm automatically when a version tag is pushed.
 
 ---
 
 ## Roadmap
 
-- [ ] Multi-DB support testing (MySQL, SQLite, CockroachDB, Oracle)
 - [ ] Impact analyzer — preview all changes before applying
 - [ ] Translations support
-- [ ] Automated test suite
 
 ---
 
 ## Contributing
 
-Pull requests are welcome! Please open an issue first to discuss what you would like to change.
+Pull requests are welcome. Please open an issue first to discuss what you would like to change.
 
 ---
 
