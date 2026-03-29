@@ -104,3 +104,17 @@ jobs:
             -f .github/docker/docker-compose.${{ matrix.db }}.yml \
             --project-directory . \
             down -v --remove-orphans
+
+  all-tests:
+    name: All Tests Passed
+    runs-on: ubuntu-latest
+    needs: [unit, integration]
+    if: always()
+    steps:
+      - name: Check all jobs passed
+        run: |
+          if [[ "${{ needs.unit.result }}" != "success" || "${{ needs.integration.result }}" != "success" ]]; then
+            echo "❌ Some tests failed"
+            exit 1
+          fi
+          echo "✅ All tests passed"
