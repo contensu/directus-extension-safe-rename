@@ -27,7 +27,11 @@ export default {
     });
 
     const filteredCollections = computed(() => {
-      return collectionsStore.visibleCollections.filter(
+      // List every non-system collection: visible and hidden table-backed
+      // collections (e.g. M2M junction tables) as well as folder collections
+      // (schema: null). The rename service treats folders as a metadata-only
+      // rename, so they are safe to expose here too.
+      return collectionsStore.collections.filter(
         (c) => !c.collection.startsWith("directus_"),
       );
     });

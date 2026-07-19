@@ -14,23 +14,37 @@ export async function fixSequence(
   // MySQL, MariaDB, SQLite, CockroachDB - nothing needed, handled automatically
 
   if (isPg) {
+    // Find the sequence(s) actually owned by the (already renamed) table via the
+    // catalog dependency link, so we use the real primary-key column name even
+    // if it was renamed (e.g. id -> id_test) and don't assume an "id"/"_id_seq"
+    // naming that may no longer hold.
     await trx.raw(`
       DO $$
       DECLARE
-        old_seq text := '${sourceCollection}_id_seq';
-        new_seq text := '${targetCollection}_id_seq';
+        rec RECORD;
+        new_seq text;
       BEGIN
-        IF EXISTS (
-          SELECT 1 FROM pg_class
-          WHERE relkind = 'S' AND relname = old_seq
-        ) THEN
-          EXECUTE format('ALTER SEQUENCE %I RENAME TO %I', old_seq, new_seq);
+        FOR rec IN
+          SELECT s.relname AS seq_name, a.attname AS col_name
+          FROM pg_class t
+          JOIN pg_depend d    ON d.refobjid = t.oid AND d.deptype = 'a'
+          JOIN pg_class s     ON s.oid = d.objid AND s.relkind = 'S'
+          JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = d.refobjsubid
+          WHERE t.relname = '${targetCollection}'
+            AND t.relkind = 'r'
+            AND pg_table_is_visible(t.oid)
+        LOOP
+          new_seq := '${targetCollection}_' || rec.col_name || '_seq';
+          IF rec.seq_name <> new_seq THEN
+            EXECUTE format('ALTER SEQUENCE %I RENAME TO %I', rec.seq_name, new_seq);
+          END IF;
           EXECUTE format(
-            'ALTER TABLE %I ALTER COLUMN id SET DEFAULT nextval(%L::regclass)',
+            'ALTER TABLE %I ALTER COLUMN %I SET DEFAULT nextval(%L::regclass)',
             '${targetCollection}',
+            rec.col_name,
             new_seq
           );
-        END IF;
+        END LOOP;
       END $$;
     `);
   }
