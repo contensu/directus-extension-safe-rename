@@ -63,14 +63,26 @@ export async function waitForDirectus(): Promise<void> {
   const deadline = Date.now() + 60_000;
   while (Date.now() < deadline) {
     try {
-      const res = await fetch(`${BASE_URL}/server/health`);
-      if (res.ok) return;
+      const health = await fetch(`${BASE_URL}/server/health`);
+      if (health.ok) return;
+
+      // Health can report "error" (e.g. a degraded cache) while the API is
+      // fully usable, so fall back to confirming that auth works.
+      const login = await fetch(`${BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: EMAIL, password: PASSWORD }),
+      });
+      if (login.ok) return;
     } catch {
       // not ready yet
     }
     await sleep(1000);
   }
-  throw new Error("Directus did not become ready within 60s");
+  throw new Error(
+    `Directus did not become ready within 60s at ${BASE_URL}. ` +
+      "Check the URL, port, and admin credentials.",
+  );
 }
 
 export function sleep(ms: number): Promise<void> {
