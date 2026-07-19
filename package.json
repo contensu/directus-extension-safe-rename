@@ -51,6 +51,8 @@
     "link": "directus-extension link",
     "validate": "directus-extension validate",
     "add": "directus-extension add",
+    "seed:dev": "node --import tsx scripts/dev-seed.ts",
+    "seed:cleanup": "node --import tsx scripts/dev-cleanup.ts",
     "test": "vitest run --no-file-parallelism",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration --no-file-parallelism"

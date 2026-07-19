@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { useApi } from "@directus/extensions-sdk";
+import ImpactPreview from "./impact-preview.vue";
 
 const api = useApi();
 
@@ -9,10 +10,12 @@ const props = defineProps<{
 }>();
 
 const newCollectionName = ref("");
+const showImpactPreview = ref(false);
+const pendingRename = ref<{ source: string; target: string } | null>(null);
 
 watch(
   () => props.activeCollection,
-  (value) => {
+  (value: string | undefined) => {
     newCollectionName.value = value ?? "";
   },
   { immediate: true },
@@ -20,16 +23,36 @@ watch(
 
 async function handleRename() {
   if (!props.activeCollection || !newCollectionName.value) return;
+  pendingRename.value = {
+    source: props.activeCollection,
+    target: newCollectionName.value,
+  };
+
+  await executeRename();
+}
+
+function openImpactPreview() {
+  if (!props.activeCollection || !newCollectionName.value) return;
+
+  pendingRename.value = {
+    source: props.activeCollection,
+    target: newCollectionName.value,
+  };
+  showImpactPreview.value = true;
+}
+
+async function executeRename() {
+  if (!pendingRename.value) return;
 
   try {
     await api.post("/safe-rename/collections/rename", {
-      sourceCollection: props.activeCollection,
-      targetCollection: newCollectionName.value,
+      sourceCollection: pendingRename.value.source,
+      targetCollection: pendingRename.value.target,
     });
 
     alert("Collection renamed successfully");
 
-    window.location.href = `/admin/safe-rename/${newCollectionName.value}`;
+    window.location.href = `/admin/safe-rename/${pendingRename.value.target}`;
   } catch (error) {
     console.error(error);
     alert("Rename failed");
@@ -77,6 +100,14 @@ function reset() {
         <v-button secondary @click="reset"> Reset </v-button>
 
         <v-button
+          secondary
+          :disabled="newCollectionName === activeCollection"
+          @click="openImpactPreview"
+        >
+          Review Impact
+        </v-button>
+
+        <v-button
           kind="primary"
           :disabled="newCollectionName === activeCollection"
           @click="handleRename"
@@ -85,6 +116,17 @@ function reset() {
         </v-button>
       </div>
     </v-card>
+
+    <!-- Impact Analysis Preview -->
+    <impact-preview
+      v-if="showImpactPreview && pendingRename"
+      type="collection"
+      :collection="props.activeCollection ?? ''"
+      :old-name="pendingRename.source"
+      :new-name="pendingRename.target"
+      @proceed="executeRename(); showImpactPreview = false"
+      @cancel="showImpactPreview = false"
+    />
   </div>
 </template>
 

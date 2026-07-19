@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: "directus"
       POSTGRES_DB: "directus"
     healthcheck:
-      test: ["CMD", "pg_isready", "--host=localhost", "--username=directus"]
+      test: [ "CMD", "pg_isready", "--host=localhost", "--username=directus" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -21,7 +21,7 @@ services:
   cache:
     image: redis:6
     healthcheck:
-      test: ["CMD-SHELL", "[ $$(redis-cli ping) = 'PONG' ]"]
+      test: [ "CMD-SHELL", "[ $$(redis-cli ping) = 'PONG' ]" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,7 +29,7 @@ services:
       start_period: 30s
 
   directus:
-    image: directus/directus:11.5.1
+    image: directus/directus:11.17.1
     ports:
       - 8055:8055
     volumes:

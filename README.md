@@ -129,7 +129,7 @@ Every pull request runs a full integration test suite across **15 jobs** (3 Dire
 
 ## Roadmap
 
-- [ ] Impact analyzer — preview all changes before applying
+- [x] Impact analyzer — preview all changes before applying
 - [ ] Translations support
 
 ---
